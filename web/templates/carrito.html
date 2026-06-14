@@ -3,18 +3,130 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Carrito</title>
-    <link rel="stylesheet" href="/static/css/styles.css">
+    <title>Carrito - E-Commerce</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI'; background: #f5f5f5; }
+        header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; }
+        .header-container { max-width: 1200px; margin: 0 auto; }
+        nav { margin-top: 15px; }
+        nav a { color: white; margin-right: 20px; text-decoration: none; }
+        .container { max-width: 800px; margin: 0 auto; padding: 20px; }
+        table { width: 100%; background: white; border-collapse: collapse; border-radius: 5px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        th { background: #667eea; color: white; padding: 15px; text-align: left; }
+        td { padding: 15px; border-bottom: 1px solid #ddd; }
+        .btn { padding: 10px 20px; background: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer; margin-right: 10px; }
+        .btn:hover { background: #764ba2; }
+        .btn-danger { background: #e74c3c; }
+        .resumen { background: white; padding: 20px; border-radius: 5px; margin-top: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .total-item { display: flex; justify-content: space-between; margin: 10px 0; }
+        .total-final { border-top: 2px solid #667eea; padding-top: 10px; font-size: 18px; font-weight: bold; color: #667eea; }
+        .empty { text-align: center; padding: 40px; color: #999; }
+        .logout { position: fixed; top: 20px; right: 20px; background: #e74c3c; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; }
+    </style>
 </head>
 <body>
     <header>
-        <h1>🛒 Tu Carrito</h1>
+        <div class="header-container">
+            <h1>🛒 Mi Carrito</h1>
+            <nav>
+                <a href="/productos">Productos</a>
+                <a href="/pedidos">Mis Pedidos</a>
+            </nav>
+        </div>
     </header>
+    <button class="logout" onclick="logout()">Cerrar Sesión</button>
 
-    <div id="carrito-list"></div>
-    <div id="total" class="total"></div>
-    <button onclick="crearPedido()" class="btn">Realizar Pedido</button>
+    <div class="container">
+        <table id="carritoTable" style="display:none;">
+            <thead>
+                <tr>
+                    <th>Producto</th>
+                    <th>Precio</th>
+                    <th>Cantidad</th>
+                    <th>Subtotal</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="carritoBody"></tbody>
+        </table>
+        <div class="empty" id="emptyCart">📭 Tu carrito está vacío</div>
 
-    <script src="/static/js/app.js"></script>
+        <div class="resumen" id="resumenDiv" style="display:none;">
+            <h3>Resumen</h3>
+            <div class="total-item total-final">
+                <span>Total:</span>
+                <span id="total">$0.00</span>
+            </div>
+            <button class="btn" onclick="checkout()" style="width:100%; margin-top:20px; font-size:16px;">✓ Finalizar Compra</button>
+            <button class="btn btn-danger" onclick="clearCart()" style="width:100%; margin-top:10px;">Vaciar</button>
+        </div>
+    </div>
+
+    <script>
+        async function loadCarrito() {
+            if (!localStorage.getItem('token')) { window.location.href = '/login'; return; }
+            try {
+                const response = await fetch('/api/carrito', { headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } });
+                const carrito = await response.json();
+
+                if (!carrito.detalles || carrito.detalles.length === 0) {
+                    document.getElementById('emptyCart').style.display = 'block';
+                    document.getElementById('carritoTable').style.display = 'none';
+                    document.getElementById('resumenDiv').style.display = 'none';
+                    return;
+                }
+
+                document.getElementById('emptyCart').style.display = 'none';
+                document.getElementById('carritoTable').style.display = 'table';
+                document.getElementById('resumenDiv').style.display = 'block';
+
+                const tbody = document.getElementById('carritoBody');
+                tbody.innerHTML = '';
+                let total = 0;
+
+                carrito.detalles.forEach(item => {
+                    const subtotal = item.cantidad * item.producto.precio;
+                    total += subtotal;
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `<td>${item.producto.nombre}</td><td>$${item.producto.precio.toFixed(2)}</td><td>${item.cantidad}</td><td>$${subtotal.toFixed(2)}</td><td><button class="btn btn-danger" onclick="removeFromCart(${item.producto.id})">Remover</button></td>`;
+                    tbody.appendChild(tr);
+                });
+
+                document.getElementById('total').textContent = `$${total.toFixed(2)}`;
+            } catch (error) { alert('Error: ' + error.message); }
+        }
+
+        async function removeFromCart(pid) {
+            try {
+                const response = await fetch(`/api/carrito/${pid}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } });
+                if (response.ok) loadCarrito();
+            } catch (error) { alert('Error: ' + error.message); }
+        }
+
+        async function clearCart() {
+            if (!confirm('¿Vaciar carrito?')) return;
+            try {
+                const response = await fetch('/api/carrito/clear', { method: 'POST', headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } });
+                if (response.ok) loadCarrito();
+            } catch (error) { alert('Error: ' + error.message); }
+        }
+
+        async function checkout() {
+            if (!confirm('¿Confirmar compra?')) return;
+            try {
+                const response = await fetch('/api/pedidos', { method: 'POST', headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } });
+                const data = await response.json();
+                if (response.ok) {
+                    alert('✓ ¡Pedido realizado!\nID: ' + data.pedido.id);
+                    window.location.href = '/pedidos';
+                } else alert('Error: ' + data.error);
+            } catch (error) { alert('Error: ' + error.message); }
+        }
+
+        function logout() { localStorage.clear(); window.location.href = '/login'; }
+
+        loadCarrito();
+    </script>
 </body>
 </html>

@@ -33,10 +33,14 @@ func (h *PedidoHandler) CrearPedido(c *gin.Context) {
 func (h *PedidoHandler) GetMisPedidos(c *gin.Context) {
 	usuarioID := c.GetInt("user_id") // Obtenido del JWT
 
-	// Por ahora devolvemos mensaje (puedes expandirlo después)
+	pedidos, err := h.service.GetMisPedidos(usuarioID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{
-		"message":    "Lista de pedidos",
-		"usuario_id": usuarioID,
-		"pedidos":    []string{}, // Implementar después
+		"message": "Lista de pedidos",
+		"pedidos": pedidos,
 	})
 }

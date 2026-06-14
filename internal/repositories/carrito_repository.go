@@ -71,3 +71,15 @@ func (r *CarritoRepository) GetDetalles(carritoID int) ([]models.CarritoDetalle,
 	}
 	return detalles, nil
 }
+
+func (r *CarritoRepository) RemoveItem(carritoID, productoID int) error {
+	_, err := r.db.Exec(
+		"DELETE FROM carrito_detalle WHERE carrito_id = $1 AND producto_id = $2",
+		carritoID, productoID)
+	return err
+}
+
+func (r *CarritoRepository) Clear(carritoID int) error {
+	_, err := r.db.Exec("DELETE FROM carrito_detalle WHERE carrito_id = $1", carritoID)
+	return err
+}

@@ -35,3 +35,19 @@ func (s *CarritoService) AddToCarrito(usuarioID, productoID, cantidad int) error
 	}
 	return s.repo.AddItem(carrito.ID, productoID, cantidad)
 }
+
+func (s *CarritoService) RemoveFromCarrito(usuarioID, productoID int) error {
+	carrito, err := s.repo.GetOrCreate(usuarioID)
+	if err != nil {
+		return err
+	}
+	return s.repo.RemoveItem(carrito.ID, productoID)
+}
+
+func (s *CarritoService) ClearCarrito(usuarioID int) error {
+	carrito, err := s.repo.GetOrCreate(usuarioID)
+	if err != nil {
+		return err
+	}
+	return s.repo.Clear(carrito.ID)
+}

@@ -71,5 +71,15 @@ func (s *PedidoService) CrearPedidoDesdeCarrito(usuarioID int) (*models.Pedido, 
 		}
 	}
 
+	// Limpiar el carrito después de crear el pedido
+	err = s.carritoRepo.Clear(carrito.ID)
+	if err != nil {
+		return nil, err
+	}
+
 	return pedido, nil
+}
+
+func (s *PedidoService) GetMisPedidos(usuarioID int) ([]models.Pedido, error) {
+	return s.pedidoRepo.GetByUsuario(usuarioID)
 }

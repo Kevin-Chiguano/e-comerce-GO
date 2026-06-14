@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Producto - Admin</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI'; background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
+        .container { background: white; padding: 40px; border-radius: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); width: 100%; max-width: 500px; }
+        h1 { color: #333; margin-bottom: 30px; text-align: center; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; color: #555; font-weight: 500; }
+        input, textarea { width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 5px; font-size: 16px; font-family: inherit; }
+        input:focus, textarea:focus { outline: none; border-color: #e74c3c; }
+        .buttons { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
+        button { flex: 1; padding: 12px; border: none; border-radius: 5px; font-size: 16px; font-weight: bold; cursor: pointer; min-width: 120px; }
+        .btn-save { background: #27ae60; color: white; }
+        .btn-save:hover { background: #229954; }
+        .btn-stock { background: #f39c12; color: white; }
+        .btn-stock:hover { background: #e67e22; }
+        .btn-cancel { background: #95a5a6; color: white; }
+        .btn-cancel:hover { background: #7f8c8d; }
+        .error { color: #e74c3c; margin-top: 10px; padding: 10px; background: #fadbd8; border-radius: 5px; display: none; }
+        .success { color: #27ae60; margin-top: 10px; padding: 10px; background: #d5f4e6; border-radius: 5px; display: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>✏️ Editar Producto</h1>
+        <form id="productoForm">
+            <div class="form-group">
+                <label for="nombre">Nombre</label>
+                <input type="text" id="nombre" required>
+            </div>
+            <div class="form-group">
+                <label for="descripcion">Descripción</label>
+                <textarea id="descripcion" required rows="4"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="precio">Precio</label>
+                <input type="number" id="precio" required step="0.01">
+            </div>
+            <div class="form-group">
+                <label for="stock">Stock</label>
+                <input type="number" id="stock" required>
+            </div>
+            <div class="form-group">
+                <label for="categoria_id">Categoría ID</label>
+                <input type="number" id="categoria_id" required>
+            </div>
+            <div class="form-group">
+                <label for="imagen">URL Imagen</label>
+                <input type="url" id="imagen">
+            </div>
+            <div class="buttons">
+                <button type="submit" class="btn-save">✓ Guardar Cambios</button>
+                <button type="button" class="btn-stock" onclick="adjustStock()">📦 Ajustar Stock</button>
+                <button type="button" class="btn-cancel" onclick="window.history.back()">Cancelar</button>
+            </div>
+            <div class="error" id="error"></div>
+            <div class="success" id="success"></div>
+        </form>
+    </div>
+
+    <script>
+        if (localStorage.getItem('rol_id') !== '1') { window.location.href = '/login'; }
+
+        const params = new URLSearchParams(window.location.search);
+        const id = params.get('id');
+
+        async function loadProducto() {
+            try {
+                const response = await fetch(`/api/productos/${id}`);
+                const p = await response.json();
+                document.getElementById('nombre').value = p.nombre;
+                document.getElementById('descripcion').value = p.descripcion;
+                document.getElementById('precio').value = p.precio;
+                document.getElementById('stock').value = p.stock;
+                document.getElementById('categoria_id').value = p.categoria_id;
+                document.getElementById('imagen').value = p.imagen || '';
+            } catch (error) { alert('Error cargando producto: ' + error.message); }
+        }
+
+        document.getElementById('productoForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const producto = {
+                nombre: document.getElementById('nombre').value,
+                descripcion: document.getElementById('descripcion').value,
+                precio: parseFloat(document.getElementById('precio').value),
+                stock: parseInt(document.getElementById('stock').value),
+                categoria_id: parseInt(document.getElementById('categoria_id').value),
+                imagen: document.getElementById('imagen').value
+            };
+
+            try {
+                const response = await fetch(`/api/productos/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+                    body: JSON.stringify(producto)
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    document.getElementById('success').textContent = '✓ Producto actualizado';
+                    document.getElementById('success').style.display = 'block';
+                    setTimeout(() => window.location.href = '/admin/productos', 1500);
+                } else {
+                    document.getElementById('error').textContent = '✗ ' + (data.error || 'Error');
+                    document.getElementById('error').style.display = 'block';
+                }
+            } catch (error) {
+                document.getElementById('error').textContent = '✗ Error: ' + error.message;
+                document.getElementById('error').style.display = 'block';
+            }
+        });
+
+        async function adjustStock() {
+            const cantidad = prompt('Ingresa cantidad (positiva para agregar, negativa para restar):');
+            if (!cantidad) return;
+
+            try {
+                const response = await fetch(`/api/productos/${id}/stock`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+                    body: JSON.stringify({ cantidad: parseInt(cantidad) })
+                });
+
+                if (response.ok) {
+                    alert('✓ Stock actualizado');
+                    loadProducto();
+                } else {
+                    alert('Error actualizando stock');
+                }
+            } catch (error) { alert('Error: ' + error.message); }
+        }
+
+        loadProducto();
+    </script>
+</body>
+</html>

@@ -38,6 +38,9 @@ func SetupRoutes(r *gin.Engine, db *sql.DB) {
 	r.GET("/productos", func(c *gin.Context) { c.File("./web/templates/productos.html") })
 	r.GET("/carrito", func(c *gin.Context) { c.File("./web/templates/carrito.html") })
 	r.GET("/pedidos", func(c *gin.Context) { c.File("./web/templates/pedidos.html") })
+	r.GET("/admin/productos", func(c *gin.Context) { c.File("./web/templates/admin_productos.html") })
+	r.GET("/admin/productos/nuevo", func(c *gin.Context) { c.File("./web/templates/admin_nuevo_producto.html") })
+	r.GET("/admin/productos/editar", func(c *gin.Context) { c.File("./web/templates/admin_editar_producto.html") })
 
 	// ==================== API Routes ====================
 	api := r.Group("/api")
@@ -53,10 +56,25 @@ func SetupRoutes(r *gin.Engine, db *sql.DB) {
 		protected := api.Group("/")
 		protected.Use(middleware.AuthMiddleware())
 		{
+			// ============= CARRITO (Usuario) =============
 			protected.GET("/carrito", carritoHandler.GetCarrito)
 			protected.POST("/carrito", carritoHandler.AddItem)
+			protected.POST("/carrito/clear", carritoHandler.ClearCarrito) // DEBE ir antes de DELETE /:producto_id
+			protected.DELETE("/carrito/:producto_id", carritoHandler.RemoveItem)
+
+			// ============= PEDIDOS (Usuario) =============
 			protected.POST("/pedidos", pedidoHandler.CrearPedido)
 			protected.GET("/pedidos", pedidoHandler.GetMisPedidos)
+
+			// ============= PRODUCTOS ADMIN =============
+			adminGroup := protected.Group("")
+			adminGroup.Use(middleware.RoleMiddleware(middleware.RoleAdmin))
+			{
+				adminGroup.POST("/productos", productoHandler.Create)
+				adminGroup.PUT("/productos/:id", productoHandler.Update)
+				adminGroup.DELETE("/productos/:id", productoHandler.Delete)
+				adminGroup.PUT("/productos/:id/stock", productoHandler.UpdateStock)
+			}
 		}
 	}
 }
