@@ -1,5 +1,6 @@
-Estructura de del Sistema
+# Estructura del Sistema
 
+```bash
 ecommerce-manager/
 │
 ├── cmd/
@@ -59,3 +60,31 @@ ecommerce-manager/
 │
 ├── go.mod
 └── README.md
+```
+
+## Descripción de Carpetas
+
+| Carpeta | Descripción |
+|---|---|
+| `cmd/` | Contiene el punto de entrada principal de la aplicación (`main.go`). |
+| `internal/models/` | Define las estructuras de datos y modelos del sistema. |
+| `internal/handlers/` | Maneja las peticiones HTTP y respuestas de la API REST. |
+| `internal/services/` | Contiene la lógica de negocio de la aplicación. |
+| `internal/repositories/` | Gestiona el acceso y operaciones con la base de datos. |
+| `internal/functional/` | Implementa programación funcional como filtros, mapeos y reducciones. |
+| `internal/middleware/` | Incluye middlewares para autenticación y registro de logs. |
+| `internal/database/` | Configuración y conexión con la base de datos. |
+| `internal/utils/` | Funciones auxiliares reutilizables del sistema. |
+| `internal/routes/` | Define las rutas y endpoints de la API. |
+| `pkg/response/` | Estructuras estandarizadas para respuestas HTTP. |
+| `configs/` | Archivos de configuración y variables de entorno. |
+
+## Tecnologías Utilizadas
+
+- Go (Golang)
+- API REST
+- GORM
+- Middleware
+- Arquitectura por capas
+- Variables de entorno (`.env`)
+- Programación funcional
