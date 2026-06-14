@@ -16,7 +16,7 @@ func NewCarritoHandler(service *services.CarritoService) *CarritoHandler {
 }
 
 func (h *CarritoHandler) GetCarrito(c *gin.Context) {
-	usuarioID := 1 // TODO: Más adelante sacar del JWT
+	usuarioID := c.GetInt("user_id")
 
 	carrito, err := h.service.GetOrCreateCarrito(usuarioID)
 	if err != nil {
@@ -27,7 +27,7 @@ func (h *CarritoHandler) GetCarrito(c *gin.Context) {
 }
 
 func (h *CarritoHandler) AddItem(c *gin.Context) {
-	usuarioID := 1 // TODO: Más adelante sacar del JWT
+	usuarioID := c.GetInt("user_id")
 
 	var req struct {
 		ProductoID int `json:"producto_id"`
@@ -45,5 +45,5 @@ func (h *CarritoHandler) AddItem(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Producto añadido al carrito"})
+	c.JSON(http.StatusOK, gin.H{"message": "Producto añadido correctamente"})
 }

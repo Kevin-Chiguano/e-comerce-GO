@@ -3,6 +3,7 @@ package routes
 import (
 	"database/sql"
 	"ecommerce-manager/internal/handlers"
+	"ecommerce-manager/internal/middleware"
 	"ecommerce-manager/internal/repositories"
 	"ecommerce-manager/internal/services"
 
@@ -31,21 +32,12 @@ func SetupRoutes(r *gin.Engine, db *sql.DB) {
 	usuarioHandler := handlers.NewUsuarioHandler(usuarioService, authService)
 
 	// ==================== RUTAS HTML ====================
-	r.GET("/", func(c *gin.Context) {
-		c.File("./web/templates/index.html")
-	})
-	r.GET("/login", func(c *gin.Context) {
-		c.File("./web/templates/login.html")
-	})
-	r.GET("/productos", func(c *gin.Context) {
-		c.File("./web/templates/productos.html")
-	})
-	r.GET("/carrito", func(c *gin.Context) {
-		c.File("./web/templates/carrito.html")
-	})
-	r.GET("/pedidos", func(c *gin.Context) {
-		c.File("./web/templates/pedidos.html")
-	})
+	r.GET("/", func(c *gin.Context) { c.File("./web/templates/index.html") })
+	r.GET("/login", func(c *gin.Context) { c.File("./web/templates/login.html") })
+	r.GET("/registro", func(c *gin.Context) { c.File("./web/templates/registro.html") })
+	r.GET("/productos", func(c *gin.Context) { c.File("./web/templates/productos.html") })
+	r.GET("/carrito", func(c *gin.Context) { c.File("./web/templates/carrito.html") })
+	r.GET("/pedidos", func(c *gin.Context) { c.File("./web/templates/pedidos.html") })
 
 	// ==================== API Routes ====================
 	api := r.Group("/api")
@@ -53,13 +45,18 @@ func SetupRoutes(r *gin.Engine, db *sql.DB) {
 		api.POST("/register", usuarioHandler.Register)
 		api.POST("/login", authHandler.Login)
 
+		// Productos públicos (sin autenticación)
 		api.GET("/productos", productoHandler.GetAll)
 		api.GET("/productos/:id", productoHandler.GetByID)
 
-		api.GET("/carrito", carritoHandler.GetCarrito)
-		api.POST("/carrito", carritoHandler.AddItem)
-
-		api.POST("/pedidos", pedidoHandler.CrearPedido)
-		api.GET("/pedidos", pedidoHandler.GetMisPedidos)
+		// Rutas protegidas con JWT
+		protected := api.Group("/")
+		protected.Use(middleware.AuthMiddleware())
+		{
+			protected.GET("/carrito", carritoHandler.GetCarrito)
+			protected.POST("/carrito", carritoHandler.AddItem)
+			protected.POST("/pedidos", pedidoHandler.CrearPedido)
+			protected.GET("/pedidos", pedidoHandler.GetMisPedidos)
+		}
 	}
 }

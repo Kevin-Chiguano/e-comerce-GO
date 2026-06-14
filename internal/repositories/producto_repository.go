@@ -15,7 +15,8 @@ func NewProductoRepository(db *sql.DB) *ProductoRepository {
 
 func (r *ProductoRepository) GetAll() ([]models.Producto, error) {
 	rows, err := r.db.Query(`
-		SELECT id, nombre, descripcion, precio, stock, categoria_id, imagen 
+		SELECT id, nombre, descripcion, precio, stock, categoria_id, 
+		       COALESCE(imagen, '') as imagen 
 		FROM productos`)
 	if err != nil {
 		return nil, err
@@ -37,7 +38,8 @@ func (r *ProductoRepository) GetAll() ([]models.Producto, error) {
 func (r *ProductoRepository) GetByID(id int) (*models.Producto, error) {
 	p := &models.Producto{}
 	err := r.db.QueryRow(`
-		SELECT id, nombre, descripcion, precio, stock, categoria_id, imagen 
+		SELECT id, nombre, descripcion, precio, stock, categoria_id, 
+		       COALESCE(imagen, '') as imagen 
 		FROM productos WHERE id = $1`, id).
 		Scan(&p.ID, &p.Nombre, &p.Descripcion, &p.Precio, &p.Stock, &p.CategoriaID, &p.Imagen)
 	if err != nil {

@@ -1,9 +1,32 @@
-// Cargar productos
+// ==================== CONFIGURACIÓN JWT ====================
+function getToken() {
+    return localStorage.getItem('token');
+}
+
+async function fetchWithAuth(url, options = {}) {
+    const token = getToken();
+    if (!token && url.includes('/api/carrito') || url.includes('/api/pedidos')) {
+        alert('Debes iniciar sesión primero');
+        window.location.href = '/login';
+        return;
+    }
+
+    options.headers = {
+        ...options.headers,
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+    };
+
+    return fetch(url, options);
+}
+
+// ==================== PRODUCTOS ====================
 async function cargarProductos() {
     const res = await fetch('/api/productos');
+    if (!res.ok) return;
+    
     const productos = await res.json();
     const container = document.getElementById('productos-list');
-
     if (!container) return;
 
     container.innerHTML = '';
@@ -19,19 +42,24 @@ async function cargarProductos() {
     });
 }
 
-// Agregar al carrito
 async function agregarAlCarrito(productoId) {
-    await fetch('/api/carrito', {
+    const res = await fetchWithAuth('/api/carrito', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ producto_id: productoId, cantidad: 1 })
     });
-    alert('Producto añadido al carrito!');
+
+    if (res && res.ok) {
+        alert('✅ Producto añadido al carrito!');
+    } else {
+        alert('Error al añadir al carrito');
+    }
 }
 
-// Cargar carrito
+// ==================== CARRITO ====================
 async function cargarCarrito() {
-    const res = await fetch('/api/carrito');
+    const res = await fetchWithAuth('/api/carrito');
+    if (!res || !res.ok) return;
+
     const carrito = await res.json();
     const container = document.getElementById('carrito-list');
     let total = 0;
@@ -39,64 +67,87 @@ async function cargarCarrito() {
     if (!container) return;
 
     container.innerHTML = '';
-    carrito.detalles.forEach(item => {
-        const subtotal = item.cantidad * item.producto.precio;
-        total += subtotal;
-        container.innerHTML += `
-            <div class="producto">
-                <h4>${item.producto.nombre}</h4>
-                <p>Cantidad: ${item.cantidad} × $${item.producto.precio}</p>
-                <p>Subtotal: $${subtotal}</p>
-            </div>
-        `;
-    });
+    if (carrito.detalles && carrito.detalles.length > 0) {
+        carrito.detalles.forEach(item => {
+            const subtotal = item.cantidad * item.producto.precio;
+            total += subtotal;
+            container.innerHTML += `
+                <div class="producto">
+                    <h4>${item.producto.nombre}</h4>
+                    <p>Cantidad: ${item.cantidad} × $${item.producto.precio}</p>
+                    <p><strong>Subtotal: $${subtotal}</strong></p>
+                </div>
+            `;
+        });
+    } else {
+        container.innerHTML = '<p>Tu carrito está vacío</p>';
+    }
 
-    document.getElementById('total').innerHTML = `<h2>Total: $${total}</h2>`;
+    const totalElement = document.getElementById('total');
+    if (totalElement) {
+        totalElement.innerHTML = `<h2>Total: $${total.toFixed(2)}</h2>`;
+    }
 }
 
-// Crear Pedido
 async function crearPedido() {
-    const res = await fetch('/api/pedidos', { method: 'POST' });
-    if (res.ok) {
-        alert('¡Pedido realizado con éxito!');
+    const res = await fetchWithAuth('/api/pedidos', { method: 'POST' });
+    if (res && res.ok) {
+        alert('🎉 Pedido realizado con éxito!');
         window.location.href = '/pedidos';
     } else {
         alert('Error al crear el pedido');
     }
 }
 
-// Cargar pedidos
+// ==================== PEDIDOS ====================
 async function cargarPedidos() {
-    // Por ahora solo placeholder
-    document.getElementById('pedidos-list').innerHTML = '<p>Funcionalidad de pedidos en desarrollo...</p>';
+    const container = document.getElementById('pedidos-list');
+    if (!container) return;
+    container.innerHTML = '<p>Cargando pedidos...</p>';
+    
+    // Implementación básica por ahora
+    container.innerHTML = `
+        <p>Funcionalidad de "Mis Pedidos" en desarrollo.</p>
+        <p>Próximamente podrás ver tu historial aquí.</p>
+    `;
 }
 
-// Login (básico)
+// ==================== AUTH ====================
+// === LOGIN ===
 document.getElementById('loginForm')?.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
+    
+    const email = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value.trim();
 
-    const res = await fetch('/api/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
-    });
+    if (!email || !password) {
+        alert("Por favor completa todos los campos");
+        return;
+    }
 
-    if (res.ok) {
-        alert('Login exitoso!');
-        window.location.href = '/productos';
-    } else {
-        alert('Credenciales incorrectas');
+    try {
+        const res = await fetch('/api/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+            localStorage.setItem('token', data.token);
+            alert('✅ Login exitoso!');
+            window.location.href = '/productos';
+        } else {
+            console.error("Error login:", data);
+            alert('❌ Credenciales incorrectas: ' + (data.error || ''));
+        }
+    } catch (err) {
+        console.error(err);
+        alert('Error de conexión');
     }
 });
 
-// Ejecutar según la página
-if (window.location.pathname === '/productos') cargarProductos();
-if (window.location.pathname === '/carrito') cargarCarrito();
-if (window.location.pathname === '/pedidos') cargarPedidos();
-
-// Registro
 document.getElementById('registerForm')?.addEventListener('submit', async (e) => {
     e.preventDefault();
     
@@ -113,28 +164,14 @@ document.getElementById('registerForm')?.addEventListener('submit', async (e) =>
     });
 
     if (res.ok) {
-        alert('¡Registro exitoso! Ahora puedes iniciar sesión.');
+        alert('✅ Registro exitoso! Ahora inicia sesión.');
+        window.location.href = '/login';
     } else {
-        alert('Error al registrarse');
+        alert('❌ Error al registrarse');
     }
 });
 
-// Login mejorado
-document.getElementById('loginForm')?.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const email = document.getElementById('loginEmail').value;
-    const password = document.getElementById('loginPassword').value;
-
-    const res = await fetch('/api/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
-    });
-
-    if (res.ok) {
-        alert('Login exitoso!');
-        window.location.href = '/productos';
-    } else {
-        alert('Credenciales incorrectas');
-    }
-});
+// ==================== EJECUCIÓN AUTOMÁTICA ====================
+if (window.location.pathname === '/productos') cargarProductos();
+if (window.location.pathname === '/carrito') cargarCarrito();
+if (window.location.pathname === '/pedidos') cargarPedidos();

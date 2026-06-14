@@ -3,26 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login / Registro</title>
+    <title>Iniciar Sesión</title>
     <link rel="stylesheet" href="/static/css/styles.css">
 </head>
 <body>
     <div class="container">
         <h2>Iniciar Sesión</h2>
         <form id="loginForm">
-            <input type="email" id="loginEmail" placeholder="Correo electrónico" required>
-            <input type="password" id="loginPassword" placeholder="Contraseña" required>
+            <input type="email" id="loginEmail" placeholder="Correo electrónico" required><br><br>
+            <input type="password" id="loginPassword" placeholder="Contraseña" required><br><br>
             <button type="submit">Iniciar Sesión</button>
         </form>
-
-        <hr>
-        <h3>¿No tienes cuenta?</h3>
-        <form id="registerForm">
-            <input type="text" id="regNombre" placeholder="Nombre completo" required>
-            <input type="email" id="regEmail" placeholder="Correo electrónico" required>
-            <input type="password" id="regPassword" placeholder="Contraseña" required>
-            <button type="submit">Registrarse</button>
-        </form>
+        <p>¿No tienes cuenta? <a href="/registro">Regístrate aquí</a></p>
     </div>
 
     <script src="/static/js/app.js"></script>
