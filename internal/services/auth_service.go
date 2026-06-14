@@ -7,6 +7,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"os"
 	"time"
+	"fmt"
 )
 
 type AuthService struct {
@@ -18,34 +19,51 @@ func NewAuthService(repo *repositories.UsuarioRepository) *AuthService {
 }
 
 func (s *AuthService) Register(user *models.Usuario) error {
+
+	fmt.Println("Nombre:", user.Nombre)
+	fmt.Println("Email:", user.Email)
+	fmt.Println("Password recibida:", user.Password)
+
 	hashed, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return err
 	}
+
 	user.Password = string(hashed)
+
+	fmt.Println("Password encriptada:", user.Password)
+
 	return s.repo.Create(user)
 }
 
 func (s *AuthService) Login(email, password string) (string, error) {
+
+	fmt.Println("Email recibido:", email)
+	fmt.Println("Password recibida:", password)
+
 	user, err := s.repo.GetByEmail(email)
 	if err != nil {
+		fmt.Println("Usuario no encontrado")
 		return "", err
 	}
 
-	// Intentar con bcrypt
-	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
+	fmt.Println("Password guardada en BD:", user.Password)
+
+	err = bcrypt.CompareHashAndPassword(
+		[]byte(user.Password),
+		[]byte(password),
+	)
+
 	if err == nil {
-		// Contraseña correcta
+		fmt.Println("Login correcto")
 	} else if user.Password == password {
-		// Soporte para admin (contraseña en texto plano)
-		// Actualizamos a hash para la próxima vez
 		hashed, _ := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 		s.repo.UpdatePassword(user.ID, string(hashed))
 	} else {
+		fmt.Println("Contraseña incorrecta")
 		return "", err
 	}
 
-	// Generar token
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"user_id": user.ID,
 		"email":   user.Email,
