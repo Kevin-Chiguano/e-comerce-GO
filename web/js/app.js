@@ -5,7 +5,7 @@ function getToken() {
 
 async function fetchWithAuth(url, options = {}) {
     const token = getToken();
-    if (!token && url.includes('/api/carrito') || url.includes('/api/pedidos')) {
+    if (!token && (url.includes('/api/carrito') || url.includes('/api/pedidos'))) {
         alert('Debes iniciar sesión primero');
         window.location.href = '/login';
         return;
@@ -48,11 +48,15 @@ async function agregarAlCarrito(productoId) {
         body: JSON.stringify({ producto_id: productoId, cantidad: 1 })
     });
 
-    if (res && res.ok) {
+    if (!res) return;
+
+    const data = await res.json().catch(() => null);
+    if (res.ok) {
         alert('✅ Producto añadido al carrito!');
-    } else {
-        alert('Error al añadir al carrito');
+        return;
     }
+
+    alert('Error al añadir al carrito: ' + (data?.error || res.statusText));
 }
 
 // ==================== CARRITO ====================

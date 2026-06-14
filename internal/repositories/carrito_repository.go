@@ -36,19 +36,47 @@ func (r *CarritoRepository) GetOrCreate(usuarioID int) (*models.Carrito, error) 
 }
 
 func (r *CarritoRepository) AddItem(carritoID, productoID, cantidad int) error {
-	_, err := r.db.Exec(`
-		INSERT INTO carrito_detalle (carrito_id, producto_id, cantidad)
-		VALUES ($1, $2, $3)
-		ON CONFLICT (carrito_id, producto_id) 
-		DO UPDATE SET cantidad = carrito_detalle.cantidad + $3`,
-		carritoID, productoID, cantidad)
-	return err
+	if cantidad <= 0 {
+		cantidad = 1
+	}
+
+	tx, err := r.db.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	res, err := tx.Exec(`
+		UPDATE carrito_detalle
+		SET cantidad = cantidad + $1
+		WHERE carrito_id = $2 AND producto_id = $3`,
+		cantidad, carritoID, productoID)
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rowsAffected == 0 {
+		_, err = tx.Exec(`
+			INSERT INTO carrito_detalle (carrito_id, producto_id, cantidad)
+			VALUES ($1, $2, $3)`,
+			carritoID, productoID, cantidad)
+		if err != nil {
+			return err
+		}
+	}
+
+	return tx.Commit()
 }
 
 func (r *CarritoRepository) GetDetalles(carritoID int) ([]models.CarritoDetalle, error) {
 	rows, err := r.db.Query(`
 		SELECT cd.id, cd.carrito_id, cd.producto_id, cd.cantidad, 
-		       p.id, p.nombre, p.precio, p.imagen
+		       p.id, p.nombre, p.precio, COALESCE(p.imagen, '') as imagen
 		FROM carrito_detalle cd
 		JOIN productos p ON cd.producto_id = p.id
 		WHERE cd.carrito_id = $1`, carritoID)

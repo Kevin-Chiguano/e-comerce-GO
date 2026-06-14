@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"net/http"
+	"os"
 	"strings"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
@@ -18,11 +19,18 @@ func AuthMiddleware() gin.HandlerFunc {
 
 		tokenString = strings.TrimPrefix(tokenString, "Bearer ")
 
+		secret := os.Getenv("JWT_SECRET")
+		if secret == "" {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Configuración de JWT inválida"})
+			c.Abort()
+			return
+		}
+
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 				return nil, jwt.ErrSignatureInvalid
 			}
-			return []byte("supersecretkey12345"), nil // Usa el mismo secret del .env
+			return []byte(secret), nil
 		})
 
 		if err != nil || !token.Valid {

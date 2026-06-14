@@ -63,11 +63,24 @@
         </div>
     </div>
 
+    <script src="/static/js/app.js"></script>
     <script>
         async function loadCarrito() {
-            if (!localStorage.getItem('token')) { window.location.href = '/login'; return; }
+            const token = localStorage.getItem('token');
+            if (!token) { window.location.href = '/login'; return; }
             try {
-                const response = await fetch('/api/carrito', { headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } });
+                const response = await fetchWithAuth('/api/carrito');
+                if (!response) return;
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        window.location.href = '/login';
+                        return;
+                    }
+                    const errorData = await response.json().catch(() => null);
+                    alert('Error al cargar el carrito: ' + (errorData?.error || response.statusText));
+                    return;
+                }
+
                 const carrito = await response.json();
 
                 if (!carrito.detalles || carrito.detalles.length === 0) {
@@ -99,28 +112,34 @@
 
         async function removeFromCart(pid) {
             try {
-                const response = await fetch(`/api/carrito/${pid}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } });
-                if (response.ok) loadCarrito();
+                const response = await fetchWithAuth(`/api/carrito/${pid}`, { method: 'DELETE' });
+                if (response && response.ok) loadCarrito();
+                else if (response && response.status === 401) window.location.href = '/login';
             } catch (error) { alert('Error: ' + error.message); }
         }
 
         async function clearCart() {
             if (!confirm('¿Vaciar carrito?')) return;
             try {
-                const response = await fetch('/api/carrito/clear', { method: 'POST', headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } });
-                if (response.ok) loadCarrito();
+                const response = await fetchWithAuth('/api/carrito/clear', { method: 'POST' });
+                if (response && response.ok) loadCarrito();
+                else if (response && response.status === 401) window.location.href = '/login';
             } catch (error) { alert('Error: ' + error.message); }
         }
 
         async function checkout() {
             if (!confirm('¿Confirmar compra?')) return;
             try {
-                const response = await fetch('/api/pedidos', { method: 'POST', headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } });
+                const response = await fetchWithAuth('/api/pedidos', { method: 'POST' });
+                if (!response) return;
                 const data = await response.json();
                 if (response.ok) {
                     alert('✓ ¡Pedido realizado!\nID: ' + data.pedido.id);
                     window.location.href = '/pedidos';
-                } else alert('Error: ' + data.error);
+                } else {
+                    alert('Error: ' + (data.error || response.statusText));
+                    if (response.status === 401) window.location.href = '/login';
+                }
             } catch (error) { alert('Error: ' + error.message); }
         }
 

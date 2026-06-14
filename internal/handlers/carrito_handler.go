@@ -40,6 +40,15 @@ func (h *CarritoHandler) AddItem(c *gin.Context) {
 		return
 	}
 
+	if req.ProductoID <= 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "ID de producto inválido"})
+		return
+	}
+
+	if req.Cantidad <= 0 {
+		req.Cantidad = 1
+	}
+
 	err := h.service.AddToCarrito(usuarioID, req.ProductoID, req.Cantidad)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
