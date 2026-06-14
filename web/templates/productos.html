@@ -1,12 +1,27 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-    <title>Productos</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Productos - E-Commerce</title>
     <link rel="stylesheet" href="/static/css/styles.css">
 </head>
 <body>
-    <h1>Productos</h1>
-    <div id="productos"></div>
+    <header>
+        <h1>🛒 Productos Disponibles</h1>
+        <nav>
+            <a href="/">Inicio</a> |
+            <a href="/carrito">Carrito</a> |
+            <a href="/pedidos">Mis Pedidos</a>
+        </nav>
+    </header>
+
+    <main>
+        <div class="productos-container" id="productos-list">
+            <!-- Los productos se cargan con JavaScript -->
+        </div>
+    </main>
+
     <script src="/static/js/app.js"></script>
 </body>
 </html>

@@ -21,16 +21,16 @@ func SetupRoutes(r *gin.Engine, db *sql.DB) {
 	productoService := services.NewProductoService(prodRepo)
 	carritoService := services.NewCarritoService(carritoRepo)
 	pedidoService := services.NewPedidoService(pedidoRepo, carritoRepo)
-	// usuarioService := services.NewUsuarioService(userRepo)  // Comentado porque no se usa aún
+	usuarioService := services.NewUsuarioService(userRepo)
 
 	// Handlers
 	authHandler := handlers.NewAuthHandler(authService)
 	productoHandler := handlers.NewProductoHandler(productoService)
 	carritoHandler := handlers.NewCarritoHandler(carritoService)
 	pedidoHandler := handlers.NewPedidoHandler(pedidoService)
-	// usuarioHandler := handlers.NewUsuarioHandler(usuarioService)  // Comentado
+	usuarioHandler := handlers.NewUsuarioHandler(usuarioService, authService)
 
-	// ==================== RUTAS HTML (Vistas) ====================
+	// ==================== RUTAS HTML ====================
 	r.GET("/", func(c *gin.Context) {
 		c.File("./web/templates/index.html")
 	})
@@ -50,7 +50,7 @@ func SetupRoutes(r *gin.Engine, db *sql.DB) {
 	// ==================== API Routes ====================
 	api := r.Group("/api")
 	{
-		api.POST("/register", authHandler.Register)
+		api.POST("/register", usuarioHandler.Register)
 		api.POST("/login", authHandler.Login)
 
 		api.GET("/productos", productoHandler.GetAll)
