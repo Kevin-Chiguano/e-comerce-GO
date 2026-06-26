@@ -83,3 +83,11 @@ func (s *PedidoService) CrearPedidoDesdeCarrito(usuarioID int) (*models.Pedido, 
 func (s *PedidoService) GetMisPedidos(usuarioID int) ([]models.Pedido, error) {
 	return s.pedidoRepo.GetByUsuario(usuarioID)
 }
+
+func (s *PedidoService) GetAllPedidos() ([]models.Pedido, error) {
+	return s.pedidoRepo.GetAll()
+}
+
+func (s *PedidoService) AprobarPedido(pedidoID int) error {
+	return s.pedidoRepo.UpdateEstado(pedidoID, "APROBADO")
+}

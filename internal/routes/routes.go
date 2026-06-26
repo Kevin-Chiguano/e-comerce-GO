@@ -41,6 +41,7 @@ func SetupRoutes(r *gin.Engine, db *sql.DB) {
 	r.GET("/admin/productos", func(c *gin.Context) { c.File("./web/templates/admin_productos.html") })
 	r.GET("/admin/productos/nuevo", func(c *gin.Context) { c.File("./web/templates/admin_nuevo_producto.html") })
 	r.GET("/admin/productos/editar", func(c *gin.Context) { c.File("./web/templates/admin_editar_producto.html") })
+	r.GET("/admin/pedidos", func(c *gin.Context) { c.File("./web/templates/admin_pedidos.html") })
 
 	// ==================== API Routes ====================
 	api := r.Group("/api")
@@ -74,6 +75,8 @@ func SetupRoutes(r *gin.Engine, db *sql.DB) {
 				adminGroup.PUT("/productos/:id", productoHandler.Update)
 				adminGroup.DELETE("/productos/:id", productoHandler.Delete)
 				adminGroup.PUT("/productos/:id/stock", productoHandler.UpdateStock)
+				adminGroup.GET("/admin/pedidos", pedidoHandler.GetAllPedidos)
+				adminGroup.PUT("/admin/pedidos/:id/aprobar", pedidoHandler.AprobarPedido)
 			}
 		}
 	}

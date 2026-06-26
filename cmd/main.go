@@ -11,9 +11,12 @@ import (
 )
 
 func main() {
-	err := godotenv.Load("configs/config.env")
+	err := godotenv.Load("configs/.env")
 	if err != nil {
-		log.Println("No .env file found")
+		log.Println("No .env file found at configs/.env")
+		if err = godotenv.Load(); err != nil {
+			log.Println("No .env file found in current directory")
+		}
 	}
 
 	db, err := database.Connect()

@@ -51,3 +51,29 @@ func (r *PedidoRepository) GetByUsuario(usuarioID int) ([]models.Pedido, error) 
 	}
 	return pedidos, nil
 }
+
+func (r *PedidoRepository) GetAll() ([]models.Pedido, error) {
+	rows, err := r.db.Query(`
+		SELECT id, usuario_id, total, estado, fecha
+		FROM pedidos ORDER BY fecha DESC`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var pedidos []models.Pedido
+	for rows.Next() {
+		var p models.Pedido
+		err := rows.Scan(&p.ID, &p.UsuarioID, &p.Total, &p.Estado, &p.Fecha)
+		if err != nil {
+			return nil, err
+		}
+		pedidos = append(pedidos, p)
+	}
+	return pedidos, nil
+}
+
+func (r *PedidoRepository) UpdateEstado(pedidoID int, estado string) error {
+	_, err := r.db.Exec(`UPDATE pedidos SET estado = $1 WHERE id = $2`, estado, pedidoID)
+	return err
+}

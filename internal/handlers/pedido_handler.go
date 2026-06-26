@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"strconv"
 	"ecommerce-manager/internal/services"
 
 	"github.com/gin-gonic/gin"
@@ -43,4 +44,33 @@ func (h *PedidoHandler) GetMisPedidos(c *gin.Context) {
 		"message": "Lista de pedidos",
 		"pedidos": pedidos,
 	})
+}
+
+func (h *PedidoHandler) GetAllPedidos(c *gin.Context) {
+	pedidos, err := h.service.GetAllPedidos()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Lista de pedidos",
+		"pedidos": pedidos,
+	})
+}
+
+func (h *PedidoHandler) AprobarPedido(c *gin.Context) {
+	pedidoID, err := strconv.Atoi(c.Param("id"))
+	if err != nil || pedidoID <= 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "ID de pedido inválido"})
+		return
+	}
+
+	err = h.service.AprobarPedido(pedidoID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Pedido aprobado correctamente"})
 }
