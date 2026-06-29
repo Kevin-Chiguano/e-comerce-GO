@@ -4,93 +4,89 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>E-Commerce - Inicio</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f5f5; }
-        header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px 20px; text-align: center; }
-        h1 { font-size: 48px; margin-bottom: 20px; }
-        nav { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; }
-        nav a { color: white; text-decoration: none; padding: 10px 20px; background: rgba(255,255,255,0.2); border-radius: 5px; transition: 0.3s; }
-        nav a:hover { background: rgba(255,255,255,0.4); }
-        .container { max-width: 1200px; margin: 40px auto; padding: 0 20px; }
-        .hero { background: white; padding: 60px 40px; text-align: center; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .hero h2 { color: #333; margin-bottom: 20px; font-size: 32px; }
-        .hero p { color: #666; margin-bottom: 30px; font-size: 18px; }
-        .cta-buttons { display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; }
-        .btn { padding: 15px 40px; border: none; border-radius: 5px; font-size: 16px; font-weight: bold; cursor: pointer; text-decoration: none; display: inline-block; }
-        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
-        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(102,126,234,0.4); }
-        .btn-secondary { background: #27ae60; color: white; }
-        .btn-secondary:hover { background: #229954; }
-        .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; margin-top: 60px; }
-        .feature { background: white; padding: 30px; border-radius: 10px; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .feature-icon { font-size: 48px; margin-bottom: 15px; }
-        .feature h3 { color: #333; margin-bottom: 10px; }
-        .feature p { color: #666; }
-        .status { text-align: center; margin-top: 40px; color: #666; }
-    </style>
+    <link rel="stylesheet" href="/static/css/styles.css">
 </head>
 <body>
-    <header>
-        <h1>🛍️ Mi E-Commerce</h1>
-        <nav>
-            <a href="#inicio">Inicio</a>
-            <a href="/productos">Productos</a>
-            <a href="/carrito">Carrito</a>
-            <a href="/pedidos">Mis Pedidos</a>
-            <a href="/login">Login</a>
-        </nav>
-    </header>
+    <div class="page-shell">
+        <header class="topbar">
+            <div class="brand">
+                <div class="brand-mark">⚡</div>
+                <div>
+                    <div>NovaStore</div>
+                    <div class="muted">E-commerce futurista</div>
+                </div>
+            </div>
+            <nav class="nav-links">
+                <a href="#inicio">Inicio</a>
+                <a href="/productos">Productos</a>
+                <a id="navActionLink" href="/carrito">Carrito</a>
+                <a href="/pedidos">Mis Pedidos</a>
+                <a href="/login">Login</a>
+            </nav>
+        </header>
 
-    <div class="container">
-        <div class="hero">
-            <h2>Bienvenido a tu tienda online</h2>
-            <p>Descubre nuestros productos y realiza compras de forma rápida y segura</p>
-            <div class="cta-buttons">
+        <main class="hero" id="inicio">
+            <h1>Tu próxima compra, con enfoque futuro.</h1>
+            <p>Explora productos destacados, gestiona tu carrito y disfruta de una experiencia de compra rápida, segura y elegante.</p>
+            <div class="hero-actions">
                 <button class="btn btn-primary" onclick="goToProductos()">🛒 Ver Productos</button>
                 <button class="btn btn-secondary" onclick="goToLogin()">🔐 Iniciar Sesión</button>
             </div>
-        </div>
+        </main>
 
-        <div class="features">
-            <div class="feature">
+        <section class="features-grid" style="margin-top: 24px;">
+            <article class="feature-card">
                 <div class="feature-icon">📦</div>
-                <h3>Productos de Calidad</h3>
-                <p>Acceso a una amplia variedad de productos seleccionados</p>
-            </div>
-            <div class="feature">
+                <h3>Catálogo premium</h3>
+                <p>Accede a una selección de productos cuidada y actualizada.</p>
+            </article>
+            <article class="feature-card">
                 <div class="feature-icon">🛒</div>
-                <h3>Carrito Inteligente</h3>
-                <p>Gestiona tu carrito de compras de forma fácil y rápida</p>
-            </div>
-            <div class="feature">
+                <h3>Carrito inteligente</h3>
+                <p>Gestiona tus artículos con un flujo simple y ágil.</p>
+            </article>
+            <article class="feature-card">
                 <div class="feature-icon">📋</div>
-                <h3>Seguimiento de Pedidos</h3>
-                <p>Mantén un registro completo de todos tus pedidos</p>
-            </div>
-            <div class="feature">
+                <h3>Seguimiento claro</h3>
+                <p>Mantén control de todos tus pedidos en un solo lugar.</p>
+            </article>
+            <article class="feature-card">
                 <div class="feature-icon">🔒</div>
-                <h3>Seguridad Garantizada</h3>
-                <p>Tus datos están protegidos con autenticación JWT</p>
-            </div>
-            <div class="feature">
+                <h3>Seguridad integrada</h3>
+                <p>Autenticación segura con tokens JWT para tus sesiones.</p>
+            </article>
+            <article class="feature-card">
                 <div class="feature-icon">👤</div>
-                <h3>Cuenta Personal</h3>
-                <p>Crea tu cuenta y accede a beneficios exclusivos</p>
-            </div>
-            <div class="feature">
+                <h3>Cuenta personal</h3>
+                <p>Regístrate y disfruta de una experiencia adaptada a ti.</p>
+            </article>
+            <article class="feature-card">
                 <div class="feature-icon">⚙️</div>
-                <h3>Panel Admin</h3>
-                <p>Gestiona productos y stock de forma centralizada</p>
-            </div>
-        </div>
+                <h3>Panel administrativo</h3>
+                <p>Controla productos, stock y pedidos desde un panel moderno.</p>
+            </article>
+        </section>
 
-        <div class="status">
-            <p id="statusText">💡 Haz clic en "Ver Productos" para comenzar a comprar</p>
+        <div class="panel" style="margin-top: 24px; text-align: center;">
+            <p id="statusText" class="muted">💡 Haz clic en “Ver Productos” para comenzar tu experiencia.</p>
         </div>
     </div>
 
     <script>
+        function updateNavForRole() {
+            const rol = localStorage.getItem('rol_id');
+            const actionLink = document.getElementById('navActionLink');
+            if (!actionLink) return;
+
+            if (rol === '1') {
+                actionLink.textContent = '➕ Agregar producto';
+                actionLink.href = '/admin/productos/nuevo';
+            } else {
+                actionLink.textContent = '🛒 Carrito';
+                actionLink.href = '/carrito';
+            }
+        }
+
         function goToProductos() {
             if (localStorage.getItem('token')) {
                 window.location.href = '/productos';
@@ -108,24 +104,13 @@
             }
         }
 
-        // Si ya está logueado, redirigir automáticamente
+        updateNavForRole();
+
         if (localStorage.getItem('token')) {
             const rol = localStorage.getItem('rol_id');
             const status = document.getElementById('statusText');
-            if (rol === '1') {
-                status.textContent = '✓ Sesión iniciada como Administrador';
-            } else {
-                status.textContent = '✓ Sesión iniciada como Usuario';
-            }
+            status.textContent = rol === '1' ? '✓ Sesión iniciada como Administrador' : '✓ Sesión iniciada como Usuario';
         }
     </script>
-</body>
-</html>
-
-    <main>
-        <h2>Bienvenido a nuestra tienda</h2>
-        <p>Encuentra los mejores productos al mejor precio.</p>
-        <a href="/productos" class="btn">Ver Productos</a>
-    </main>
 </body>
 </html>

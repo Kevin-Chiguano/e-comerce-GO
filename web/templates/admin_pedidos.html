@@ -4,56 +4,44 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pedidos - Admin</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI'; background: #f5f5f5; }
-        header { background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); color: white; padding: 20px; }
-        .header-container { max-width: 1200px; margin: 0 auto; }
-        nav { margin-top: 15px; }
-        nav a { color: white; margin-right: 20px; text-decoration: none; }
-        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
-        table { width: 100%; background: white; border-collapse: collapse; border-radius: 5px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        th { background: #e74c3c; color: white; padding: 15px; text-align: left; }
-        td { padding: 15px; border-bottom: 1px solid #ddd; }
-        tr:hover { background: #f9f9f9; }
-        .estado { padding: 5px 10px; border-radius: 3px; font-size: 12px; font-weight: bold; }
-        .estado.pendiente { background: #fff3cd; color: #856404; }
-        .estado.aprobado { background: #d1ecf1; color: #0c5460; }
-        .estado.completado { background: #d4edda; color: #155724; }
-        .estado.cancelado { background: #f8d7da; color: #721c24; }
-        .btn { padding: 8px 15px; margin-right: 5px; border: none; border-radius: 3px; cursor: pointer; font-size: 12px; }
-        .btn-approve { background: #27ae60; color: white; }
-        .logout { position: fixed; top: 20px; right: 20px; background: #c0392b; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; }
-        .empty { text-align: center; padding: 40px; color: #999; }
-    </style>
+    <link rel="stylesheet" href="/static/css/styles.css">
 </head>
 <body>
-    <header>
-        <div class="header-container">
-            <h1>🧾 Pedidos Pendientes</h1>
-            <nav>
-                <a href="/admin/productos">Administrar Productos</a>
-                <a href="/productos">Ver Tienda</a>
+    <div class="page-shell">
+        <header class="topbar">
+            <div class="brand">
+                <div class="brand-mark">🧾</div>
+                <div>
+                    <div>Pedidos pendientes</div>
+                    <div class="muted">Aprobación y seguimiento de compras</div>
+                </div>
+            </div>
+            <nav class="nav-links">
+                <a href="/admin/productos/nuevo">➕ Agregar producto</a>
+                <a href="/admin/productos">Administrar productos</a>
+                <a href="/productos">Ver tienda</a>
+                <button class="logout-btn" onclick="logout()">Cerrar sesión</button>
             </nav>
-        </div>
-    </header>
-    <button class="logout" onclick="logout()">Cerrar Sesión</button>
+        </header>
 
-    <div class="container">
-        <table id="pedidosTable" style="display:none;">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Usuario</th>
-                    <th>Fecha</th>
-                    <th>Total</th>
-                    <th>Estado</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody id="pedidosBody"></tbody>
-        </table>
-        <div class="empty" id="emptyPedidos">📭 No hay pedidos aún</div>
+        <main class="panel" style="margin-top: 24px;">
+            <div class="table-shell">
+                <table id="pedidosTable" style="display:none;">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Usuario</th>
+                            <th>Fecha</th>
+                            <th>Total</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pedidosBody"></tbody>
+                </table>
+            </div>
+            <div class="empty-state" id="emptyPedidos">📭 No hay pedidos aún</div>
+        </main>
     </div>
 
     <script>
@@ -85,8 +73,8 @@
                         <td>${p.usuario_id}</td>
                         <td>${fecha}</td>
                         <td>$${p.total.toFixed(2)}</td>
-                        <td><span class="estado ${estado}">${p.estado || 'PENDIENTE'}</span></td>
-                        <td>${p.estado === 'PENDIENTE' ? `<button class="btn btn-approve" onclick="aprobarPedido(${p.id})">Aprobar</button>` : ''}</td>
+                        <td><span class="status-pill ${estado}">${p.estado || 'PENDIENTE'}</span></td>
+                        <td>${p.estado === 'PENDIENTE' ? `<button class="btn btn-success" onclick="aprobarPedido(${p.id})">Aprobar</button>` : ''}</td>
                     `;
                     tbody.appendChild(tr);
                 });

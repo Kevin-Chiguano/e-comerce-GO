@@ -4,63 +4,54 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Carrito - E-Commerce</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI'; background: #f5f5f5; }
-        header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; }
-        .header-container { max-width: 1200px; margin: 0 auto; }
-        nav { margin-top: 15px; }
-        nav a { color: white; margin-right: 20px; text-decoration: none; }
-        .container { max-width: 800px; margin: 0 auto; padding: 20px; }
-        table { width: 100%; background: white; border-collapse: collapse; border-radius: 5px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        th { background: #667eea; color: white; padding: 15px; text-align: left; }
-        td { padding: 15px; border-bottom: 1px solid #ddd; }
-        .btn { padding: 10px 20px; background: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer; margin-right: 10px; }
-        .btn:hover { background: #764ba2; }
-        .btn-danger { background: #e74c3c; }
-        .resumen { background: white; padding: 20px; border-radius: 5px; margin-top: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .total-item { display: flex; justify-content: space-between; margin: 10px 0; }
-        .total-final { border-top: 2px solid #667eea; padding-top: 10px; font-size: 18px; font-weight: bold; color: #667eea; }
-        .empty { text-align: center; padding: 40px; color: #999; }
-        .logout { position: fixed; top: 20px; right: 20px; background: #e74c3c; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; }
-    </style>
+    <link rel="stylesheet" href="/static/css/styles.css">
 </head>
 <body>
-    <header>
-        <div class="header-container">
-            <h1>🛒 Mi Carrito</h1>
-            <nav>
+    <div class="page-shell">
+        <header class="topbar">
+            <div class="brand">
+                <div class="brand-mark">🛒</div>
+                <div>
+                    <div>Tu carrito</div>
+                    <div class="muted">Resumen de compra en tiempo real</div>
+                </div>
+            </div>
+            <nav class="nav-links">
                 <a href="/productos">Productos</a>
                 <a href="/pedidos">Mis Pedidos</a>
+                <button class="logout-btn" onclick="logout()">Cerrar sesión</button>
             </nav>
-        </div>
-    </header>
-    <button class="logout" onclick="logout()">Cerrar Sesión</button>
+        </header>
 
-    <div class="container">
-        <table id="carritoTable" style="display:none;">
-            <thead>
-                <tr>
-                    <th>Producto</th>
-                    <th>Precio</th>
-                    <th>Cantidad</th>
-                    <th>Subtotal</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody id="carritoBody"></tbody>
-        </table>
-        <div class="empty" id="emptyCart">📭 Tu carrito está vacío</div>
-
-        <div class="resumen" id="resumenDiv" style="display:none;">
-            <h3>Resumen</h3>
-            <div class="total-item total-final">
-                <span>Total:</span>
-                <span id="total">$0.00</span>
+        <main class="panel" style="margin-top: 24px;">
+            <div class="table-shell">
+                <table id="carritoTable" style="display:none;">
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th>Precio</th>
+                            <th>Cantidad</th>
+                            <th>Subtotal</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="carritoBody"></tbody>
+                </table>
             </div>
-            <button class="btn" onclick="checkout()" style="width:100%; margin-top:20px; font-size:16px;">✓ Finalizar Compra</button>
-            <button class="btn btn-danger" onclick="clearCart()" style="width:100%; margin-top:10px;">Vaciar</button>
-        </div>
+            <div class="empty-state" id="emptyCart">📭 Tu carrito está vacío</div>
+
+            <div class="summary-card" id="resumenDiv" style="display:none;">
+                <h3>Resumen</h3>
+                <div class="summary-row summary-total">
+                    <span>Total:</span>
+                    <span id="total">$0.00</span>
+                </div>
+                <div class="button-row" style="margin-top: 16px;">
+                    <button class="btn btn-primary" onclick="checkout()" style="width: 100%;">✓ Finalizar compra</button>
+                    <button class="btn btn-danger" onclick="clearCart()" style="width: 100%;">Vaciar carrito</button>
+                </div>
+            </div>
+        </main>
     </div>
 
     <script src="/static/js/app.js"></script>

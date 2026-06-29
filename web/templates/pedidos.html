@@ -4,57 +4,69 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mis Pedidos - E-Commerce</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI'; background: #f5f5f5; }
-        header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; }
-        .header-container { max-width: 1200px; margin: 0 auto; }
-        nav { margin-top: 15px; }
-        nav a { color: white; margin-right: 20px; text-decoration: none; }
-        .container { max-width: 900px; margin: 0 auto; padding: 20px; }
-        table { width: 100%; background: white; border-collapse: collapse; border-radius: 5px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        th { background: #667eea; color: white; padding: 15px; text-align: left; }
-        td { padding: 15px; border-bottom: 1px solid #ddd; }
-        tr:hover { background: #f9f9f9; }
-        .estado { padding: 5px 10px; border-radius: 3px; font-size: 12px; font-weight: bold; }
-        .estado.pendiente { background: #fff3cd; color: #856404; }
-        .estado.aprobado { background: #d1ecf1; color: #0c5460; }
-        .estado.completado { background: #d4edda; color: #155724; }
-        .estado.cancelado { background: #f8d7da; color: #721c24; }
-        .empty { text-align: center; padding: 40px; color: #999; }
-        .logout { position: fixed; top: 20px; right: 20px; background: #e74c3c; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; }
-    </style>
+    <link rel="stylesheet" href="/static/css/styles.css">
 </head>
 <body>
-    <header>
-        <div class="header-container">
-            <h1>📋 Mis Pedidos</h1>
-            <nav>
+    <div class="page-shell">
+        <header class="topbar">
+            <div class="brand">
+                <div class="brand-mark">📋</div>
+                <div>
+                    <div>Mis pedidos</div>
+                    <div class="muted">Historial y estado de tus compras</div>
+                </div>
+            </div>
+            <nav class="nav-links">
                 <a href="/productos">Productos</a>
-                <a href="/carrito">🛒 Carrito</a>
+                <a id="navActionLink" href="/carrito">🛒 Carrito</a>
+                <a id="navAdminPanelLink" href="/admin/productos" style="display:none">🛠️ Administrar productos</a>
+                <a id="navAdminOrdersLink" href="/admin/pedidos" style="display:none">🧾 Pedidos admin</a>
+                <button class="logout-btn" onclick="logout()">Cerrar sesión</button>
             </nav>
-        </div>
-    </header>
-    <button class="logout" onclick="logout()">Cerrar Sesión</button>
+        </header>
 
-    <div class="container">
-        <table id="pedidosTable" style="display:none;">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Fecha</th>
-                    <th>Total</th>
-                    <th>Estado</th>
-                </tr>
-            </thead>
-            <tbody id="pedidosBody"></tbody>
-        </table>
-        <div class="empty" id="emptyPedidos">📭 No tienes pedidos aún</div>
+        <main class="panel" style="margin-top: 24px;">
+            <div class="table-shell">
+                <table id="pedidosTable" style="display:none;">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Fecha</th>
+                            <th>Total</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pedidosBody"></tbody>
+                </table>
+            </div>
+            <div class="empty-state" id="emptyPedidos">📭 No tienes pedidos aún</div>
+        </main>
     </div>
 
     <script>
+        function updateNavForRole() {
+            const rol = localStorage.getItem('rol_id');
+            const actionLink = document.getElementById('navActionLink');
+            const adminPanelLink = document.getElementById('navAdminPanelLink');
+            const adminOrdersLink = document.getElementById('navAdminOrdersLink');
+            if (!actionLink || !adminPanelLink || !adminOrdersLink) return;
+
+            if (rol === '1') {
+                actionLink.textContent = '➕ Agregar producto';
+                actionLink.href = '/admin/productos/nuevo';
+                adminPanelLink.style.display = 'inline-block';
+                adminOrdersLink.style.display = 'inline-block';
+            } else {
+                actionLink.textContent = '🛒 Carrito';
+                actionLink.href = '/carrito';
+                adminPanelLink.style.display = 'none';
+                adminOrdersLink.style.display = 'none';
+            }
+        }
+
         async function loadPedidos() {
             if (!localStorage.getItem('token')) { window.location.href = '/login'; return; }
+            updateNavForRole();
             try {
                 const response = await fetch('/api/pedidos', { headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } });
                 const data = await response.json();
@@ -80,7 +92,7 @@
                         <td>#${p.id}</td>
                         <td>${fecha}</td>
                         <td>$${p.total.toFixed(2)}</td>
-                        <td><span class="estado ${estado}">${p.estado || 'PENDIENTE'}</span></td>
+                        <td><span class="status-pill ${estado}">${p.estado || 'PENDIENTE'}</span></td>
                     `;
                     tbody.appendChild(tr);
                 });

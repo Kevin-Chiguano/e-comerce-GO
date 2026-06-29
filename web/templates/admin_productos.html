@@ -4,61 +4,49 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Productos - Admin</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI'; background: #f5f5f5; }
-        header { background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); color: white; padding: 20px; }
-        .header-container { max-width: 1200px; margin: 0 auto; }
-        nav { margin-top: 15px; }
-        nav a { color: white; margin-right: 20px; text-decoration: none; }
-        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
-        .btn-nuevo { background: #27ae60; color: white; padding: 12px 20px; text-decoration: none; border-radius: 5px; margin-bottom: 20px; display: inline-block; }
-        .btn-nuevo:hover { background: #229954; }
-        table { width: 100%; background: white; border-collapse: collapse; border-radius: 5px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        th { background: #e74c3c; color: white; padding: 15px; text-align: left; }
-        td { padding: 12px 15px; border-bottom: 1px solid #ddd; }
-        tr:hover { background: #f9f9f9; }
-        .btn { padding: 8px 15px; margin-right: 5px; border: none; border-radius: 3px; cursor: pointer; font-size: 12px; }
-        .btn-edit { background: #3498db; color: white; }
-        .btn-delete { background: #e74c3c; color: white; }
-        .btn-stock { background: #f39c12; color: white; }
-        .logout { position: fixed; top: 20px; right: 20px; background: #c0392b; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; }
-    </style>
+    <link rel="stylesheet" href="/static/css/styles.css">
 </head>
 <body>
-    <header>
-        <div class="header-container">
-            <h1>⚙️ Gestión de Productos</h1>
-            <nav>
-                <a href="/productos">Ver Tienda</a>
-                <a href="/admin/pedidos">Gestionar Pedidos</a>
+    <div class="page-shell">
+        <header class="topbar">
+            <div class="brand">
+                <div class="brand-mark">⚙️</div>
+                <div>
+                    <div>Panel de administración</div>
+                    <div class="muted">Gestiona catálogo, stock y pedidos</div>
+                </div>
+            </div>
+            <nav class="nav-links">
+                <a href="/admin/productos/nuevo">➕ Agregar producto</a>
+                <a href="/admin/pedidos">Gestionar pedidos</a>
+                <a href="/productos">Ver tienda</a>
+                <button class="logout-btn" onclick="logout()">Cerrar sesión</button>
             </nav>
-        </div>
-    </header>
-    <button class="logout" onclick="logout()">Cerrar Sesión</button>
+        </header>
 
-    <div class="container">
-        <a href="/admin/productos/nuevo" class="btn-nuevo">+ Crear Nuevo Producto</a>
-        
-        <table id="productosTable">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Nombre</th>
-                    <th>Precio</th>
-                    <th>Stock</th>
-                    <th>Categoría</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody id="productosBody"></tbody>
-        </table>
+        <main class="panel" style="margin-top: 24px;">
+            <a href="/admin/productos/nuevo" class="btn btn-success" style="margin-bottom: 16px;">+ Crear nuevo producto</a>
+            <div class="table-shell">
+                <table id="productosTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Precio</th>
+                            <th>Stock</th>
+                            <th>Categoría</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="productosBody"></tbody>
+                </table>
+            </div>
+        </main>
     </div>
 
     <script>
         async function loadProductos() {
             if (localStorage.getItem('rol_id') !== '1') { window.location.href = '/login'; return; }
-            
             try {
                 const response = await fetch('/api/productos');
                 const productos = await response.json();
@@ -76,9 +64,9 @@
                         <td>${p.stock}</td>
                         <td>${p.categoria_id}</td>
                         <td>
-                            <a href="/admin/productos/editar?id=${p.id}" class="btn btn-edit">Editar</a>
-                            <button class="btn btn-stock" onclick="editStock(${p.id})">Stock</button>
-                            <button class="btn btn-delete" onclick="deleteProducto(${p.id})">Eliminar</button>
+                            <a href="/admin/productos/editar?id=${p.id}" class="btn btn-secondary">Editar</a>
+                            <button class="btn btn-warning" onclick="editStock(${p.id})">Stock</button>
+                            <button class="btn btn-danger" onclick="deleteProducto(${p.id})">Eliminar</button>
                         </td>
                     `;
                     tbody.appendChild(tr);

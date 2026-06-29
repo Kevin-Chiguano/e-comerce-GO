@@ -4,49 +4,58 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Productos - E-Commerce</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI'; background: #f5f5f5; }
-        header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; }
-        .header-container { max-width: 1200px; margin: 0 auto; }
-        nav { margin-top: 15px; }
-        nav a { color: white; margin-right: 20px; text-decoration: none; }
-        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
-        .productos-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
-        .producto { background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .producto img { width: 100%; height: 200px; object-fit: cover; }
-        .producto-info { padding: 15px; }
-        .producto h3 { color: #333; margin-bottom: 8px; }
-        .precio { color: #667eea; font-size: 20px; font-weight: bold; margin-bottom: 10px; }
-        .stock { font-size: 12px; color: #666; margin-bottom: 10px; }
-        .stock.bajo { color: #e74c3c; }
-        .btn { width: 100%; padding: 10px; background: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer; }
-        .btn:hover { background: #764ba2; }
-        .btn:disabled { background: #ccc; cursor: not-allowed; }
-        .logout { position: fixed; top: 20px; right: 20px; background: #e74c3c; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; }
-        .error { color: #e74c3c; text-align: center; padding: 20px; background: #fadbd8; border-radius: 5px; margin: 20px 0; display: none; }
-    </style>
+    <link rel="stylesheet" href="/static/css/styles.css">
 </head>
 <body>
-    <header>
-        <div class="header-container">
-            <h1>🛍️ Productos</h1>
-            <nav>
-                <a href="/carrito">🛒 Carrito</a>
+    <div class="page-shell">
+        <header class="topbar">
+            <div class="brand">
+                <div class="brand-mark">🛍️</div>
+                <div>
+                    <div>Catálogo NovaStore</div>
+                    <div class="muted">Productos seleccionados para tu próxima compra</div>
+                </div>
+            </div>
+            <nav class="nav-links">
+                <a href="/productos">Productos</a>
+                <a id="navActionLink" href="/carrito">🛒 Carrito</a>
+                <a id="navAdminPanelLink" href="/admin/productos" style="display:none">🛠️ Administrar productos</a>
+                <a id="navAdminOrdersLink" href="/admin/pedidos" style="display:none">🧾 Pedidos admin</a>
                 <a href="/pedidos">📋 Mis Pedidos</a>
+                <button class="logout-btn" onclick="logout()">Cerrar sesión</button>
             </nav>
-        </div>
-    </header>
-    <button class="logout" onclick="logout()">Cerrar Sesión</button>
+        </header>
 
-    <main class="container">
-        <div id="error" class="error"></div>
-        <div class="productos-container" id="productos-list"></div>
-    </main>
+        <main class="panel" style="margin-top: 24px;">
+            <div id="error" class="error"></div>
+            <div class="productos-container" id="productos-list"></div>
+        </main>
+    </div>
 
     <script>
+        function updateNavForRole() {
+            const rol = localStorage.getItem('rol_id');
+            const actionLink = document.getElementById('navActionLink');
+            const adminPanelLink = document.getElementById('navAdminPanelLink');
+            const adminOrdersLink = document.getElementById('navAdminOrdersLink');
+            if (!actionLink || !adminPanelLink || !adminOrdersLink) return;
+
+            if (rol === '1') {
+                actionLink.textContent = '➕ Agregar producto';
+                actionLink.href = '/admin/productos/nuevo';
+                adminPanelLink.style.display = 'inline-block';
+                adminOrdersLink.style.display = 'inline-block';
+            } else {
+                actionLink.textContent = '🛒 Carrito';
+                actionLink.href = '/carrito';
+                adminPanelLink.style.display = 'none';
+                adminOrdersLink.style.display = 'none';
+            }
+        }
+
         async function loadProductos() {
             if (!localStorage.getItem('token')) { window.location.href = '/login'; return; }
+            updateNavForRole();
             try {
                 const response = await fetch('/api/productos');
                 const productos = await response.json();
@@ -65,12 +74,12 @@
                     const img = p.imagen || 'https://via.placeholder.com/250x200?text=Sin+imagen';
                     div.innerHTML = `
                         <img src="${img}" alt="${p.nombre}">
-                        <div class="producto-info">
+                        <div>
                             <h3>${p.nombre}</h3>
-                            <p>${(p.descripcion || '').substring(0, 50)}...</p>
+                            <p class="muted">${(p.descripcion || '').substring(0, 70)}${(p.descripcion || '').length > 70 ? '...' : ''}</p>
                             <div class="precio">$${p.precio.toFixed(2)}</div>
                             <div class="stock ${p.stock <= 5 ? 'bajo' : ''}">Stock: ${p.stock}</div>
-                            <button class="btn" onclick="addToCart(${p.id}, '${p.nombre}')" ${p.stock <= 0 ? 'disabled' : ''}>Agregar al Carrito</button>
+                            <button class="btn btn-primary" style="width: 100%;" onclick="addToCart(${p.id}, '${p.nombre}')" ${p.stock <= 0 ? 'disabled' : ''}>Agregar al carrito</button>
                         </div>
                     `;
                     container.appendChild(div);
